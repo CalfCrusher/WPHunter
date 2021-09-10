@@ -98,10 +98,7 @@ def googledork(dork, amount, wordlist, usetor):
         parsed_uri = urlparse(result)
         wordpress = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
 
-        # Check if we already have this domain in loot folder
         filename = parsed_uri.netloc + ".json".strip('\n')
-
-        # Create full path to the file
         pathfile = loot_path + filename
 
         if Path(pathfile).is_file():
