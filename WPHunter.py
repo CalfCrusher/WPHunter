@@ -96,6 +96,7 @@ def googledork(dork, amount, wordlist, usetor):
     for result in search(dork, tld="com", lang="en", num=int(amount), start=0, stop=None, pause=8):
         parsed_uri = urlparse(result)
         wordpress = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+        wordpress = "http://192.168.1.29/wordpress/"
 
         # Check if we already have this domain in loot folder
         filename = parsed_uri.netloc + ".json".strip('\n')
@@ -138,6 +139,13 @@ def main():
 
     global dbfile
     dbfile = "creds.db"
+
+    # Check if wpscan is installed
+    rc = subprocess.call(['which', 'wpscan'], stdout=subprocess.PIPE)
+    if rc:
+        print('\n')
+        print(colored(' * ERROR - This tool require wpscan (https://github.com/wpscanteam/wpscan) to run! Exiting..', 'red'))
+        exit(0)
 
     print(colored(" -------------------", 'green'))
     print(colored(" 1. Search & Brute", 'green'))
