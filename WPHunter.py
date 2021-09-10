@@ -88,13 +88,22 @@ def googledork(dork, amount, wordlist, usetor):
 
     requ = 0
 
+    # Check if loot folder exist
+    loot_path = str(os.getcwd() + "/loot/")
+    if not Path.exists(loot_path):
+        os.system("mkdir " + loot_path)
+
     for result in search(dork, tld="com", lang="en", num=int(amount), start=0, stop=None, pause=8):
         parsed_uri = urlparse(result)
         wordpress = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
         wordpress = "http://192.168.1.29/wordpress/"
+
         # Check if we already have this domain in loot folder
         filename = parsed_uri.netloc + ".json".strip('\n')
-        pathfile = os.getcwd() + "/loot/" + filename
+
+        # Create full path to the file
+        pathfile = loot_path + filename
+
         if Path(pathfile).is_file():
             # File exist already so skip this host
             print(colored(" - Skipping " + wordpress + " (already scanned)", 'red'))
