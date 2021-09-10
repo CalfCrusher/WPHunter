@@ -96,7 +96,6 @@ def googledork(dork, amount, wordlist, usetor):
     for result in search(dork, tld="com", lang="en", num=int(amount), start=0, stop=None, pause=8):
         parsed_uri = urlparse(result)
         wordpress = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
-        wordpress = "http://192.168.1.29/wordpress/"
 
         # Check if we already have this domain in loot folder
         filename = parsed_uri.netloc + ".json".strip('\n')
