@@ -23,4 +23,4 @@ If you get errors about googlesearch module try this:
 
 ### Disclaimer
 
-I made this tool just for educational use only. I'm not responsible for the consequences of illegal use. Test only on yours systems.
+I made this tool just for educational use only. I'm not responsible for the consequences of illegal use.
