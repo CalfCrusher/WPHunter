@@ -58,16 +58,11 @@ def savecreds(pathfile, url):
         with open(pathfile) as json_file:
             obj_data = json.load(json_file)
             # Continue only if scan wasn't aborted
-            #for key in obj_data:
-            #    for value in obj_data[key]:
-            #        if 'scan_aborted' in value:
-            #            cursor.close()
-            #            return
-            # Write credentials to database
             if 'password_attack' in obj_data:
                 for username in obj_data['password_attack']:
                     if username:
                         print(colored(" * Pw3ned! " + url, 'magenta'))
+                        # Write credentials to db
                         cursor.execute("INSERT INTO Credentials VALUES (?, ?, ?)", (username, obj_data['password_attack'][username]['password'], url))
                         connection.commit()
         cursor.close()
@@ -151,7 +146,7 @@ def main():
     rc = subprocess.call(['which', 'wpscan'], stdout=subprocess.PIPE)
     if rc:
         print()
-        print(colored(' * ERROR - This tool require wpscan to run ! (https://github.com/wpscanteam/wpscan)', 'red'))
+        print(colored(' * ERROR - This tool requires wpscan to run ! (https://github.com/wpscanteam/wpscan)', 'red'))
         exit(0)
 
     print(colored(" -------------------", 'green'))
