@@ -33,6 +33,7 @@ If you get errors about googlesearch module try this:
 ### TODO
 
 .Adding more dorks for CVE
+
 .Parse some know vulnerabilities and report them (without using api-token on wpscan)
 
 ### Disclaimer
