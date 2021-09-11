@@ -1,6 +1,7 @@
 # WPHunter
 Wordpress Hunting Bruteforce Tool with Google Dork
 
+![](https://github.com/CalfCrusher/WPHunter/blob/main/img/WPHunter.png)
 
 ### Usage
 
@@ -11,10 +12,15 @@ Wordpress Hunting Bruteforce Tool with Google Dork
 `$ python3 WPHunter.py`
 
 
-NOTE:
+### Note
 
 If you get errors about googlesearch module try this:
 
 `$ pip3 uninstall google googlesearch googlesearch-python search`
 
 `$ pip3 install -r requirements.txt`
+
+
+### Disclaimer
+
+I made this tool just for educational use only. I'm not responsible for the consequences of illegal use. Test only on yours systems.
