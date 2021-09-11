@@ -32,7 +32,7 @@ def showcreds():
     cur.close()
 
     while True:
-        response = input(colored(" * Back to menu or exit [menu/exit] ", 'yellow'))
+        response = input(colored(" Back to menu or exit [menu/exit] ", 'yellow'))
         if not response.isalpha():
             continue
         if response == 'menu' or response == 'exit':
@@ -64,7 +64,7 @@ def savecreds(pathfile, url):
                     cursor.execute("INSERT INTO Credentials VALUES (?, ?, ?)", (username, obj_data['password_attack'][username]['password'], url))
                     connection.commit()
         cursor.close()
-    except sqlite3.Error as error:
+    except sqlite3.Error:
         print(colored(" * Error while connecting to database!", 'red'))
 
 
@@ -86,6 +86,7 @@ def googledork(dork, amount, wordlist, usetor):
 
     print('\n'.strip('\n'))
     print(colored(" * Retrieving dork results..", 'red'))
+    print('\n'.strip('\n'))
 
     requ = 0
 
@@ -97,7 +98,9 @@ def googledork(dork, amount, wordlist, usetor):
     for result in search(dork, tld="com", lang="en", num=int(amount), start=0, stop=None, pause=8):
         parsed_uri = urlparse(result)
         wordpress = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+        # wordpress = "http://192.168.1.29/wordpress/"
 
+        # Create filename
         filename = parsed_uri.netloc + ".json".strip('\n')
         pathfile = loot_path + filename
 
@@ -152,7 +155,7 @@ def main():
     print('\n'.strip('\n'))
 
     while True:
-        response = input(colored(" * Enter your choice [1-3] ", 'yellow'))
+        response = input(colored(" Enter your choice [1-3] ", 'yellow'))
         if not response.isnumeric():
             main()
             continue
@@ -172,15 +175,15 @@ def main():
     dork = "\"index of\" inurl:wp-content/\""
 
     while True:
-        response = input(colored(" * Enter number of results to retrieve: ", 'yellow'))
+        response = input(colored(" Enter number of results to retrieve: ", 'yellow'))
         if not response.isnumeric():
-            print(colored(" ! Please insert a number", 'red'))
+            print(colored(" * Please insert a number", 'red'))
             continue
         else:
             amount = response
             break
     while True:
-        response = input(colored(" * Type full path to password wordlist: ", 'yellow'))
+        response = input(colored(" Type full path to password wordlist: ", 'yellow'))
         if not os.path.isfile(response):
             print(colored(" * Unable to access file !", 'red'))
             continue
@@ -191,7 +194,7 @@ def main():
     usetor = False
 
     while True:
-        response = input(colored(" * Do you want use TOR? [yes/no] ", 'yellow'))
+        response = input(colored(" Do you want use TOR? [yes/no] ", 'yellow'))
         if not response.isalpha():
             continue
         if response == 'yes' or response == 'no':
@@ -209,14 +212,15 @@ def main():
                 if response == 'yes' or response == 'no':
                     break
             if response == 'yes':
-                print(colored(" * running scan with TOR disabled..", 'red'))
+                print(colored(" * Running scan with TOR disabled..", 'red'))
                 usetor = False
             else:
                 print(colored(" * Exiting..", 'yellow'))
                 exit(0)
         else:
             # Start TOR
-            print(colored(" * Starting tor network..", 'yellow'))
+            print('\n'.strip('\n'))
+            print(colored(" * Starting tor network..", 'red'))
             os.system("tor --quiet &")
             time.sleep(5)
             usetor = True
