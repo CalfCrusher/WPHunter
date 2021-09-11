@@ -25,9 +25,9 @@ def showcreds():
         cur.execute('SELECT * FROM Credentials ORDER BY url')
         data = from_db_cursor(cur)
 
-    print('\n'.strip('\n'))
+    print()
     print(data)
-    print('\n'.strip('\n'))
+    print()
 
     cur.close()
 
@@ -57,12 +57,19 @@ def savecreds(pathfile, url):
         # Reading JSON from file - a nested dict -
         with open(pathfile) as json_file:
             obj_data = json.load(json_file)
+            # Continue only if scan wasn't aborted
+            #for key in obj_data:
+            #    for value in obj_data[key]:
+            #        if 'scan_aborted' in value:
+            #            cursor.close()
+            #            return
             # Write credentials to database
-            for username in obj_data['password_attack']:
-                if username:
-                    print(colored(" * Pw3ned! " + url, 'magenta'))
-                    cursor.execute("INSERT INTO Credentials VALUES (?, ?, ?)", (username, obj_data['password_attack'][username]['password'], url))
-                    connection.commit()
+            if 'password_attack' in obj_data:
+                for username in obj_data['password_attack']:
+                    if username:
+                        print(colored(" * Pw3ned! " + url, 'magenta'))
+                        cursor.execute("INSERT INTO Credentials VALUES (?, ?, ?)", (username, obj_data['password_attack'][username]['password'], url))
+                        connection.commit()
         cursor.close()
     except sqlite3.Error:
         print(colored(" * Error while connecting to database!", 'red'))
@@ -84,9 +91,9 @@ def wpscan(wpurl, wordlists, pathfile, usetor):
 def googledork(dork, amount, wordlist, usetor):
     """Wordpress google dork"""
 
-    print('\n'.strip('\n'))
+    print()
     print(colored(" * Retrieving google results..", 'red'))
-    print('\n'.strip('\n'))
+    print()
 
     requ = 0
 
@@ -143,7 +150,7 @@ def main():
     # Check if wpscan is installed
     rc = subprocess.call(['which', 'wpscan'], stdout=subprocess.PIPE)
     if rc:
-        print('\n'.strip('\n'))
+        print()
         print(colored(' * ERROR - This tool require wpscan to run ! (https://github.com/wpscanteam/wpscan)', 'red'))
         exit(0)
 
@@ -152,7 +159,7 @@ def main():
     print(colored(" 2. Show Credentials", 'green'))
     print(colored(" 3. Exit", 'green'))
     print(colored(" -------------------", 'green'))
-    print('\n'.strip('\n'))
+    print()
 
     while True:
         response = input(colored(" Enter your choice [1-3] ", 'yellow'))
@@ -164,7 +171,6 @@ def main():
 
     if int(response) == 2:
         showcreds()
-
     elif int(response) == 3:
         os.system("clear")
         exit(0)
@@ -219,7 +225,7 @@ def main():
                 exit(0)
         else:
             # Start TOR
-            print('\n'.strip('\n'))
+            print()
             print(colored(" * Starting tor network..", 'red'))
             os.system("tor --quiet &")
             time.sleep(5)
@@ -232,7 +238,7 @@ def main():
         print(colored(" * Killing TOR pid..", 'yellow'))
         os.kill(int(check_output(["pidof", "tor"])), signal.SIGTERM)
 
-    print('\n'.strip('\n'))
+    print()
     print(colored(" * Completed !", 'yellow'))
     exit(0)
 
