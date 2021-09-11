@@ -3,6 +3,16 @@ Wordpress Hunting Bruteforce Tool with Google Dork
 
 ![](https://github.com/CalfCrusher/WPHunter/blob/main/img/WPHunter.png)
 
+### Features
+
+-> Multiple dorks for Wordpress
+
+-> WPSCAN (wpscan.com)
+
+-> TOR support
+
+-> Save passwords to db
+
 ### Usage
 
 `$ git clone https://github.com/CalfCrusher/WPHunter/`
