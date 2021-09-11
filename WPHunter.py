@@ -85,7 +85,7 @@ def googledork(dork, amount, wordlist, usetor):
     """Wordpress google dork"""
 
     print('\n'.strip('\n'))
-    print(colored(" * Retrieving dork results..", 'red'))
+    print(colored(" * Retrieving google results..", 'red'))
     print('\n'.strip('\n'))
 
     requ = 0
