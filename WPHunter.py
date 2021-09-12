@@ -28,40 +28,49 @@ def checkvuln(pathfile):
             # CHECK CORE WORDPRESS VULNERABLE VERSION
             if str(obj_data['version']['number']) == '4.6':
                 print(colored("\t > Found WordPress " + obj_data['version']['number'] + " vulnerable to RCE (CVE-2016-10033)", 'magenta'))
+                time.sleep(5)
 
             # JOOMSPORT
             if 'joomsport' in str(obj_data) and obj_data['plugins']['joomsport-sports-league-results-management']['version']:
                 # Check for vulnerability version in JoomSport 3.3 - SQL INJECTION
                 if str(obj_data['plugins']['joomsport-sports-league-results-management']['version']['number']) == '3.3':
                     print(colored("\t > Found JoomSport " + obj_data['plugins']['joomsport-sports-league-results-management']['version']['number'] + " vulnerable to SQL Injection (CVE-2019-14348)", 'magenta'))
+                    time.sleep(5)
 
             # SOCIAL WARFARE
             if 'Social Warfare' in str(obj_data) and obj_data['plugins']['social-warfare']['version']:
                 # Check for vulnerability version in Social Warfare Plugin < 3.5.3 - RCE
                 if str(obj_data['plugins']['social-warfare']['version']['number']) < '3.5.3':
                     print(colored("\t > Found Social Warfare " + obj_data['plugins']['social-warfare']['version']['number'] + " vulnerable to Remote Code Execution (CVE-2019-9978)", 'magenta'))
+                    time.sleep(5)
 
             # CONTACT FORM 7
             if 'contact-form-7' in str(obj_data) and obj_data['plugins']['contact-form-7']['version']:
                 # Check for vulnerability version in Contact Form 7 - Unrestricted File Upload
                 if str(obj_data['plugins']['contact-form-7']['version']['number']) < '5.3.2':
                     print(colored("\t > Found Contact Form " + obj_data['plugins']['contact-form-7']['version']['number'] + " vulnerable to Unrestricted File Upload (CVE-2020-35489)", 'magenta'))
+                    time.sleep(5)
 
             # YOAST SEO
             if 'wordpress-seo' in str(obj_data) and obj_data['plugins']['wordpress-seo']['version']:
                 # Check for vulnerability version in Yoast SEO - Blind SQL Injection
                 if str(obj_data['plugins']['wordpress-seo']['version']['number']) == '1.7.3.3':
                     print(colored("\t > Found Yoast SEO " + obj_data['plugins']['wordpress-seo']['version']['number'] + " vulnerable to Blind SQL Injection (CVE-2015-2292)", 'magenta'))
+                    time.sleep(5)
 
         # Check for some errors, timeouts, waf and so on..
         elif 'WAF' in str(obj_data):
             print(colored("\t > WAF Detected!", 'red'))
+            time.sleep(5)
         elif 'Timeout was reached' in str(obj_data):
             print(colored("\t > Timeout Reached!", 'red'))
+            time.sleep(5)
         elif 'scan_aborted' in str(obj_data):
             print(colored("\t > Aborted due to some redirect or website not running Wordpress!", 'red'))
+            time.sleep(5)
         else:
             print(colored("\t > Aborted for unrecognized error!", 'red'))
+            time.sleep(5)
 
 def showdorks():
     """Show Wordpress google dorks available and returns choosen"""
@@ -227,8 +236,8 @@ def googledork(dork, amount, wordlist, usetor):
         if Path(pathfile).is_file():
             # File exist already so skip this host and not increment requ var
             print(colored(" - Skipping " + wordpress + " (already scanned)", 'green'))
-            # Sleep to avoid a ban from google
-            time.sleep(4)
+            # Sleep to avoid ban from google
+            time.sleep(10)
             continue
 
         print(colored(" + Scanning " + wordpress, 'green'))
