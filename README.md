@@ -34,7 +34,9 @@ If you get errors about googlesearch module try this:
 
 ### TODO
 
-.Adding more dorks for CVE
+.Add more dorks for CVE
+
+.Add more CVE to checkvuln() function
 
 ### Disclaimer
 
