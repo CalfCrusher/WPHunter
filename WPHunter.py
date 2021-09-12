@@ -30,25 +30,25 @@ def checkvuln(pathfile):
                 print(colored("\t > Found WordPress " + obj_data['version']['number'] + " vulnerable to RCE (CVE-2016-10033)", 'magenta'))
 
             # JOOMSPORT
-            if 'joomsport' in str(obj_data) and obj_data['plugins']['joomsport-sports-league-results-management']['version']['number']:
+            if 'joomsport' in str(obj_data) and obj_data['plugins']['joomsport-sports-league-results-management']['version']:
                 # Check for vulnerability version in JoomSport 3.3 - SQL INJECTION
                 if str(obj_data['plugins']['joomsport-sports-league-results-management']['version']['number']) == '3.3':
                     print(colored("\t > Found JoomSport " + obj_data['plugins']['joomsport-sports-league-results-management']['version']['number'] + " vulnerable to SQL Injection (CVE-2019-14348)", 'magenta'))
 
             # SOCIAL WARFARE
-            if 'Social Warfare' in str(obj_data) and obj_data['plugins']['social-warfare']['version']['number']:
+            if 'Social Warfare' in str(obj_data) and obj_data['plugins']['social-warfare']['version']:
                 # Check for vulnerability version in Social Warfare Plugin < 3.5.3 - RCE
                 if str(obj_data['plugins']['social-warfare']['version']['number']) < '3.5.3':
                     print(colored("\t > Found Social Warfare " + obj_data['plugins']['social-warfare']['version']['number'] + " vulnerable to Remote Code Execution (CVE-2019-9978)", 'magenta'))
 
             # CONTACT FORM 7
-            if 'contact-form-7' in str(obj_data) and obj_data['plugins']['contact-form-7']['version']['number']:
+            if 'contact-form-7' in str(obj_data) and obj_data['plugins']['contact-form-7']['version']:
                 # Check for vulnerability version in Contact Form 7 - Unrestricted File Upload
                 if str(obj_data['plugins']['contact-form-7']['version']['number']) < '5.3.2':
                     print(colored("\t > Found Contact Form " + obj_data['plugins']['contact-form-7']['version']['number'] + " vulnerable to Unrestricted File Upload (CVE-2020-35489)", 'magenta'))
 
             # YOAST SEO
-            if 'wordpress-seo' in str(obj_data) and obj_data['plugins']['wordpress-seo']['version']['number']:
+            if 'wordpress-seo' in str(obj_data) and obj_data['plugins']['wordpress-seo']['version']:
                 # Check for vulnerability version in Yoast SEO - Blind SQL Injection
                 if str(obj_data['plugins']['wordpress-seo']['version']['number']) == '1.7.3.3':
                     print(colored("\t > Found Yoast SEO " + obj_data['plugins']['wordpress-seo']['version']['number'] + " vulnerable to Blind SQL Injection (CVE-2015-2292)", 'magenta'))
