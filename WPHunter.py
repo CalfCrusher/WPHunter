@@ -22,24 +22,30 @@ def checkvuln(pathfile):
 
     with open(pathfile) as json_file:
         obj_data = json.load(json_file)
+
         if 'joomsport' in str(obj_data):
             print('joomsport FOUND')
             # Check for vulnerability version in JoomSport 3.3 - SQL INJECTION
             if str(obj_data['plugins']['joomsport-sports-league-results-management']['version']['number']) == '3.3':
-                print(colored("\t > Found JoomSport " + obj_data['plugins']['joomsport-sports-league-results-management']['version']['number'] + " vulnerable to SQL Injection (CVE-2019-14348)", 'magenta'))
+                print(colored(
+                    "\t > Found JoomSport " +
+                    obj_data['plugins']['joomsport-sports-league-results-management']['version'][
+                        'number'] + " vulnerable to SQL Injection (CVE-2019-14348)", 'magenta'))
         if 'Social Warfare' in str(obj_data):
             # Check for vulnerability version in Social Warfare Plugin < 3.5.3 - RCE
             if str(obj_data['plugins']['social-warfare']['version']['number']) < '3.5.3':
-                print(colored("\t > Found Social Warfare " + obj_data['plugins']['social-warfare']['version']['number'] + " vulnerable to Remote Code Execution (CVE-2019-9978)", 'magenta'))
+                print(colored("\t > Found Social Warfare " + obj_data['plugins']['social-warfare']['version'][
+                    'number'] + " vulnerable to Remote Code Execution (CVE-2019-9978)", 'magenta'))
         # Check WAF
-        if 'WAF' in obj_data.values():
+        if 'WAF' in str(obj_data):
             print(colored("\t WAF Detected!", 'red'))
         # Check if timeout is reached
-        if 'Timeout was reached' in obj_data.values():
+        elif 'Timeout was reached' in str(obj_data):
             print(colored("\t Timeout Reached!", 'red'))
         # Check if site is not running wordpress (due to wrong result in dork, happens!)
-        if 'scan_aborted' in str(obj_data):
+        elif 'scan_aborted' in str(obj_data):
             print(colored("\t Website is up, but does not seem to be running WordPress!", 'red'))
+
 
 def showdorks():
     """Show Wordpress google dorks available and returns choosen"""
