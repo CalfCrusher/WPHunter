@@ -22,10 +22,6 @@ def checkvuln(pathfile):
 
     with open(pathfile) as json_file:
         obj_data = json.load(json_file)
-        # If 'password_attack' string exist that means scan was finished successful
-        #if 'password_attack' in obj_data:
-        #    if str(obj_data['plugins']['joomsport-sports-league-results-management']['version']['number']) == '3.3':
-        #        print(colored("\t > JoomSport " + obj_data['plugins']['joomsport-sports-league-results-management']['version']['number'] + " is vulnerable to SQL Injection (CVE-2019-14348)", 'magenta'))
         if 'joomsport' in str(obj_data):
             print('joomsport FOUND')
             # Check for vulnerability version in JoomSport 3.3 - SQL INJECTION
