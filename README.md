@@ -7,6 +7,8 @@ Wordpress Hunting Bruteforce Tool with Google Dork
 
 -> Multiple dorks for Wordpress
 
+-> Check most commons CVE
+
 -> WPSCAN (wpscan.com)
 
 -> TOR support
