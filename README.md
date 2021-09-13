@@ -7,7 +7,7 @@ Wordpress Hunting Bruteforce Tool with Google Dork
 
 -> Multiple dorks for Wordpress
 
--> Check most commons CVE
+-> Check some commons CVE
 
 -> WPSCAN (wpscan.com)
 
@@ -34,7 +34,8 @@ If you get errors about googlesearch module try this:
 
 ### TODO
 
-.Add VULNERS api
+.Add more CVE to check
+
 .Add more dorks for CVE
 
 ### Disclaimer
