@@ -26,11 +26,10 @@ def checkvuln(pathfile):
         # Check vulnerabilities only if scanned was completed successful using password_attack key in dict
         if 'password_attack' in obj_data:
             # CHECK CORE WORDPRESS VULNERABLE VERSION
-            if str(obj_data['version']['number']) == '4.6':
-                print(colored(
-                    "\t > WordPress " + obj_data['version']['number'] + " vulnerable to RCE (CVE-2016-10033)",
-                    'magenta'))
-                time.sleep(5)
+            if obj_data['version']:
+                if str(obj_data['version']['number']) == '4.6':
+                    print(colored("\t > WordPress " + obj_data['version']['number'] + " vulnerable to RCE (CVE-2016-10033)", 'magenta'))
+                    time.sleep(5)
 
             # JOOMSPORT
             if 'joomsport' in str(obj_data) and obj_data['plugins']['joomsport-sports-league-results-management'][
