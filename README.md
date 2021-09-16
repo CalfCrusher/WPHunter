@@ -1,5 +1,5 @@
 # WPHunter
-Wordpress Hunting Bruteforce Tool with Google Dork
+Wordpress Hunting Vulnerabilities and Bruteforce tool using Google Dork
 
 ![](https://github.com/CalfCrusher/WPHunter/blob/main/img/WPHunter.png)
 
